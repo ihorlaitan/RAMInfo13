@@ -1,4 +1,5 @@
 #import "RINRootListController.h"
+#import "SparkColourPickerView.h"
 #import "spawn.h"
 
 @implementation RINRootListController

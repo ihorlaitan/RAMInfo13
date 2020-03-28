@@ -1,5 +1,6 @@
 #import "RAMInfo13.h"
 
+#import "SparkColourPickerUtils.h"
 #import <Cephei/HBPreferences.h>
 #import <mach/mach_init.h>
 #import <mach/mach_host.h>
@@ -31,6 +32,8 @@ static double width;
 static double height;
 static long fontSize;
 static BOOL boldFont;
+static BOOL customColorEnabled;
+static UIColor *customColor;
 static long alignment;
 static double updateInterval;
 
@@ -107,9 +110,12 @@ static void loadDeviceScreenDimensions()
 				
 				ramInfoLabel = [[UILabel alloc]initWithFrame:CGRectMake(0, 0, width, height)];
 				[ramInfoLabel setNumberOfLines: 1];
-				[ramInfoLabel setFont: [UIFont systemFontOfSize: fontSize]];
+				if(boldFont) [ramInfoLabel setFont: [UIFont boldSystemFontOfSize: fontSize]];
+				else [ramInfoLabel setFont: [UIFont systemFontOfSize: fontSize]];
 				[ramInfoLabel setTextAlignment: alignment];
 				[(UIView *)ramInfoWindow addSubview: ramInfoLabel];
+
+				if(customColorEnabled) [self updateColor: customColor];
 				
 				[self orientationChanged];
 
@@ -242,7 +248,7 @@ static void loadDeviceScreenDimensions()
 {
 	%orig;
 	
-	if(ramInfoObject && [self styleAttributes] && [[self styleAttributes] imageTintColor]) 
+	if(!customColorEnabled && ramInfoObject && [self styleAttributes] && [[self styleAttributes] imageTintColor]) 
 		[ramInfoObject updateColor: [[self styleAttributes] imageTintColor]];
 }
 
@@ -265,8 +271,17 @@ static void settingsChanged(CFNotificationCenterRef center, void *observer, CFSt
 	height = [pref floatForKey: @"height"];
 	fontSize = [pref integerForKey: @"fontSize"];
 	boldFont = [pref boolForKey: @"boldFont"];
+	customColorEnabled = [pref boolForKey: @"customColorEnabled"];
 	alignment = [pref integerForKey: @"alignment"];
 	updateInterval = [pref doubleForKey: @"updateInterval"];
+
+	if(customColorEnabled)
+	{
+		NSDictionary *preferencesDictionary = [NSDictionary dictionaryWithContentsOfFile: @"/var/mobile/Library/Preferences/com.johnzaro.raminfo13prefs.colors.plist"];
+		customColor = [SparkColourPickerUtils colourWithString: [preferencesDictionary objectForKey: @"customColor"] withFallback: @"#FF9400"];
+
+		if(ramInfoObject) [ramInfoObject updateColor: customColor];
+	}
 
 	if(ramInfoObject) 
 		[ramInfoObject updateFrame];
@@ -293,6 +308,7 @@ static void settingsChanged(CFNotificationCenterRef center, void *observer, CFSt
 			@"height": @12,
 			@"fontSize": @8,
 			@"boldFont": @NO,
+			@"customColorEnabled": @NO,
 			@"alignment": @0,
 			@"updateInterval": @2.0
     	}];
