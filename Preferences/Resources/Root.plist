@@ -15,6 +15,10 @@
 		<dict>
         	<key>cell</key>
 			<string>PSGroupCell</string>
+			<key>footerText</key>
+			<string>All Settings Below Except The 'Update Interval' Are Updated Dynamically And Do Not Require A Respring. Disabling The Tweak Requires A Respring.</string>
+			<key>footerAlignment</key>
+			<integer>1</integer>
         </dict>
 		<dict>
 			<key>cell</key>
@@ -45,6 +49,8 @@
 			<string>showUsedRam</string>
 			<key>label</key>
 			<string>Show Used RAM</string>
+			<key>PostNotification</key>
+			<string>com.johnzaro.raminfo13prefs/reloadprefs</string>
 		</dict>
 		<dict>
 			<key>cell</key>
@@ -57,6 +63,8 @@
 			<string>usedRAMPrefix</string>
 			<key>label</key>
 			<string>Used RAM Prefix</string>
+			<key>PostNotification</key>
+			<string>com.johnzaro.raminfo13prefs/reloadprefs</string>
 		</dict>
 		<dict>
 			<key>cell</key>
@@ -69,6 +77,8 @@
 			<string>showFreeRam</string>
 			<key>label</key>
 			<string>Show Free RAM</string>
+			<key>PostNotification</key>
+			<string>com.johnzaro.raminfo13prefs/reloadprefs</string>
 		</dict>
 		<dict>
 			<key>cell</key>
@@ -81,6 +91,8 @@
 			<string>freeRAMPrefix</string>
 			<key>label</key>
 			<string>Free RAM Prefix</string>
+			<key>PostNotification</key>
+			<string>com.johnzaro.raminfo13prefs/reloadprefs</string>
 		</dict>
 		<dict>
 			<key>cell</key>
@@ -93,6 +105,8 @@
 			<string>showTotalPhysicalRam</string>
 			<key>label</key>
 			<string>Show Total Physical RAM</string>
+			<key>PostNotification</key>
+			<string>com.johnzaro.raminfo13prefs/reloadprefs</string>
 		</dict>
 		<dict>
 			<key>cell</key>
@@ -105,6 +119,8 @@
 			<string>totalRAMPrefix</string>
 			<key>label</key>
 			<string>Total RAM Prefix</string>
+			<key>PostNotification</key>
+			<string>com.johnzaro.raminfo13prefs/reloadprefs</string>
 		</dict>
 		<dict>
 			<key>cell</key>
@@ -121,6 +137,8 @@
 			<string>separator</string>
 			<key>label</key>
 			<string>Separator</string>
+			<key>PostNotification</key>
+			<string>com.johnzaro.raminfo13prefs/reloadprefs</string>
 		</dict>
 		<dict>
 			<key>cell</key>
@@ -141,6 +159,8 @@
 			<string>locationX</string>
 			<key>label</key>
 			<string>Location X</string>
+			<key>PostNotification</key>
+			<string>com.johnzaro.raminfo13prefs/reloadprefs</string>
 		</dict>
 		<dict>
 			<key>cell</key>
@@ -155,6 +175,8 @@
 			<string>locationY</string>
 			<key>label</key>
 			<string>Location Y</string>
+			<key>PostNotification</key>
+			<string>com.johnzaro.raminfo13prefs/reloadprefs</string>
 		</dict>
 		<dict>
 			<key>cell</key>
@@ -175,6 +197,8 @@
 			<string>width</string>
 			<key>label</key>
 			<string>Width</string>
+			<key>PostNotification</key>
+			<string>com.johnzaro.raminfo13prefs/reloadprefs</string>
 		</dict>
 		<dict>
 			<key>cell</key>
@@ -189,6 +213,8 @@
 			<string>height</string>
 			<key>label</key>
 			<string>Height</string>
+			<key>PostNotification</key>
+			<string>com.johnzaro.raminfo13prefs/reloadprefs</string>
 		</dict>
 		<dict>
 			<key>cell</key>
@@ -209,6 +235,22 @@
 			<string>fontSize</string>
 			<key>label</key>
 			<string>Font Size</string>
+			<key>PostNotification</key>
+			<string>com.johnzaro.raminfo13prefs/reloadprefs</string>
+		</dict>
+		<dict>
+			<key>cell</key>
+			<string>PSSwitchCell</string>
+			<key>default</key>
+			<false/>
+			<key>defaults</key>
+			<string>com.johnzaro.raminfo13prefs</string>
+			<key>key</key>
+			<string>boldFont</string>
+			<key>label</key>
+			<string>Bold Font</string>
+			<key>PostNotification</key>
+			<string>com.johnzaro.raminfo13prefs/reloadprefs</string>
 		</dict>
 		<dict>
 			<key>cell</key>
@@ -239,6 +281,8 @@
 			</array>
 			<key>label</key>
 			<string>Alignment</string>
+			<key>PostNotification</key>
+			<string>com.johnzaro.raminfo13prefs/reloadprefs</string>
 		</dict>
 		<dict>
 			<key>cell</key>
