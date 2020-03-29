@@ -6,7 +6,6 @@
 #import <mach/mach_host.h>
 
 #define DegreesToRadians(degrees) (degrees * M_PI / 180)
-#define IS_iPAD ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPad)
 
 static const unsigned int MEGABYTES = 1 << 20;
 static unsigned long long PHYSICAL_MEMORY;
@@ -26,8 +25,11 @@ static NSString *freeRAMPrefix;
 static BOOL showTotalPhysicalRam;
 static NSString *totalRAMPrefix;
 static NSString *separator;
-static double locationX;
-static double locationY;
+static double portraitX;
+static double portraitY;
+static double landscapeX;
+static double landscapeY;
+static BOOL followDeviceOrientation;
 static double width;
 static double height;
 static long fontSize;
@@ -73,8 +75,8 @@ static NSString* getMemoryStats()
 
 static void orientationChanged()
 {
-	if(IS_iPAD && ramInfoObject) 
-		[ramInfoObject orientationChanged];
+	if(followDeviceOrientation && ramInfoObject) 
+		[ramInfoObject updateOrientation];
 }
 
 static void loadDeviceScreenDimensions()
@@ -108,16 +110,11 @@ static void loadDeviceScreenDimensions()
 				[ramInfoWindow _setSecure: YES];
 				[ramInfoWindow setUserInteractionEnabled: NO];
 				
-				ramInfoLabel = [[UILabel alloc]initWithFrame:CGRectMake(0, 0, width, height)];
+				ramInfoLabel = [[UILabel alloc] initWithFrame: CGRectMake(0, 0, width, height)];
 				[ramInfoLabel setNumberOfLines: 1];
-				if(boldFont) [ramInfoLabel setFont: [UIFont boldSystemFontOfSize: fontSize]];
-				else [ramInfoLabel setFont: [UIFont systemFontOfSize: fontSize]];
-				[ramInfoLabel setTextAlignment: alignment];
 				[(UIView *)ramInfoWindow addSubview: ramInfoLabel];
 
-				if(customColorEnabled) [self updateColor: customColor];
-				
-				[self orientationChanged];
+				[self updateFrame];
 
 				[NSTimer scheduledTimerWithTimeInterval: updateInterval target: self selector: @selector(updateText) userInfo: nil repeats: YES];
 
@@ -137,41 +134,46 @@ static void loadDeviceScreenDimensions()
 
 	- (void)_updateFrame
 	{
-		[ramInfoWindow setFrame: CGRectMake(0, 0, width, height)];
-		[ramInfoLabel setFrame: CGRectMake(0, 0, width, height)];
+		[self updateRAMInfoLabelProperties];
+		[self updateRAMInfoSize];
+
+		orientationOld = nil;
+		[self updateOrientation];
+	}
+
+	- (void)updateRAMInfoLabelProperties
+	{
 		if(boldFont) [ramInfoLabel setFont: [UIFont boldSystemFontOfSize: fontSize]];
 		else [ramInfoLabel setFont: [UIFont systemFontOfSize: fontSize]];
+
 		[ramInfoLabel setTextAlignment: alignment];
-		[self orientationChanged];
+
+		if(customColorEnabled)
+			[ramInfoObject updateTextColor: customColor];
 	}
 
-	- (void)updateText
+	- (void)updateRAMInfoSize
 	{
-		if(ramInfoWindow && ramInfoLabel)
-		{
-			if(![[%c(SBCoverSheetPresentationManager) sharedInstance] isPresented] && ![[%c(SBControlCenterController) sharedInstance] isVisible])
-			{
-				[ramInfoWindow setHidden: NO];
-				[ramInfoLabel setText: getMemoryStats()];
-			}
-			else [ramInfoWindow setHidden: YES];
-		}
+		CGRect frame = [ramInfoLabel frame];
+		frame.size.width = width;
+		frame.size.height = height;
+		[ramInfoLabel setFrame: frame];
+
+		frame = [ramInfoWindow frame];
+		frame.size.width = width;
+		frame.size.height = height;
+		[ramInfoWindow setFrame: frame];
 	}
 
-	- (void)updateColor: (UIColor*)color
+	- (void)updateOrientation
 	{
-		[ramInfoLabel setTextColor: color];
-	}
-
-	- (void)orientationChanged
-	{
-		if(!IS_iPAD)
+		if(!followDeviceOrientation)
 		{
 			CGRect frame = [ramInfoWindow frame];
-			frame.origin.x = locationX;
-			frame.origin.y = locationY;
+			frame.origin.x = portraitX;
+			frame.origin.y = portraitY;
 			[ramInfoWindow setFrame: frame];
-		}
+		} 
 		else
 		{
 			UIDeviceOrientation orientation = [[UIApplication sharedApplication] _frontMostAppOrientation];
@@ -186,30 +188,30 @@ static void loadDeviceScreenDimensions()
 			{
 				case UIDeviceOrientationLandscapeRight:
 				{
-					newLocationX = locationY;
-					newLocationY = (screenHeight - width - locationX);
+					newLocationX = landscapeY;
+					newLocationY = screenHeight - width - landscapeX;
 					newTransform = CGAffineTransformMakeRotation(-DegreesToRadians(90));
 					break;
 				}
 				case UIDeviceOrientationLandscapeLeft:
 				{
-					newLocationX = (screenWidth - height - locationY);
-					newLocationY = locationX;
+					newLocationX = screenWidth - height - landscapeY;
+					newLocationY = landscapeX;
 					newTransform = CGAffineTransformMakeRotation(DegreesToRadians(90));
 					break;
 				}
 				case UIDeviceOrientationPortraitUpsideDown:
 				{
-					newLocationX = screenWidth - locationX - width;
-					newLocationY = (screenHeight - height - locationY);
+					newLocationX = screenWidth - portraitX - width;
+					newLocationY = screenHeight - height - portraitY;
 					newTransform = CGAffineTransformMakeRotation(DegreesToRadians(180));
 					break;
 				}
 				case UIDeviceOrientationPortrait:
 				default:
 				{
-					newLocationX = locationX;
-					newLocationY = locationY;
+					newLocationX = portraitX;
+					newLocationY = portraitY;
 					newTransform = CGAffineTransformMakeRotation(DegreesToRadians(0));
 					break;
 				}
@@ -224,6 +226,24 @@ static void loadDeviceScreenDimensions()
 				[ramInfoWindow setFrame: frame];
 				orientationOld = orientation;
 			} completion: nil];
+		}
+	}
+
+	- (void)updateTextColor: (UIColor*)color
+	{
+		[ramInfoLabel setTextColor: color];
+	}
+
+	- (void)updateText
+	{
+		if(ramInfoWindow && ramInfoLabel)
+		{
+			if(![[%c(SBCoverSheetPresentationManager) sharedInstance] isPresented] && ![[%c(SBControlCenterController) sharedInstance] isVisible])
+			{
+				[ramInfoWindow setHidden: NO];
+				[ramInfoLabel setText: getMemoryStats()];
+			}
+			else [ramInfoWindow setHidden: YES];
 		}
 	}
 
@@ -249,7 +269,7 @@ static void loadDeviceScreenDimensions()
 	%orig;
 	
 	if(!customColorEnabled && ramInfoObject && [self styleAttributes] && [[self styleAttributes] imageTintColor]) 
-		[ramInfoObject updateColor: [[self styleAttributes] imageTintColor]];
+		[ramInfoObject updateTextColor: [[self styleAttributes] imageTintColor]];
 }
 
 %end
@@ -265,8 +285,11 @@ static void settingsChanged(CFNotificationCenterRef center, void *observer, CFSt
 	showTotalPhysicalRam = [pref boolForKey: @"showTotalPhysicalRam"];
 	totalRAMPrefix = [pref objectForKey: @"totalRAMPrefix"];
 	separator = [pref objectForKey: @"separator"];
-	locationX = [pref floatForKey: @"locationX"];
-	locationY = [pref floatForKey: @"locationY"];
+	portraitX = [pref floatForKey: @"portraitX"];
+	portraitY = [pref floatForKey: @"portraitY"];
+	landscapeX = [pref floatForKey: @"landscapeX"];
+	landscapeY = [pref floatForKey: @"landscapeY"];
+	followDeviceOrientation = [pref boolForKey: @"followDeviceOrientation"];
 	width = [pref floatForKey: @"width"];
 	height = [pref floatForKey: @"height"];
 	fontSize = [pref integerForKey: @"fontSize"];
@@ -279,8 +302,6 @@ static void settingsChanged(CFNotificationCenterRef center, void *observer, CFSt
 	{
 		NSDictionary *preferencesDictionary = [NSDictionary dictionaryWithContentsOfFile: @"/var/mobile/Library/Preferences/com.johnzaro.raminfo13prefs.colors.plist"];
 		customColor = [SparkColourPickerUtils colourWithString: [preferencesDictionary objectForKey: @"customColor"] withFallback: @"#FF9400"];
-
-		if(ramInfoObject) [ramInfoObject updateColor: customColor];
 	}
 
 	if(ramInfoObject) 
@@ -302,8 +323,11 @@ static void settingsChanged(CFNotificationCenterRef center, void *observer, CFSt
 			@"showTotalPhysicalRam": @NO,
 			@"totalRAMPrefix": @"T: ",
 			@"separator": @", ",
-			@"locationX": @298,
-			@"locationY": @2,
+			@"portraitX": @298,
+			@"portraitY": @2,
+			@"landscapeX": @750,
+			@"landscapeY": @2,
+			@"followDeviceOrientation": @NO,
 			@"width": @55,
 			@"height": @12,
 			@"fontSize": @8,

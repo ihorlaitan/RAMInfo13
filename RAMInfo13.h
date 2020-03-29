@@ -9,9 +9,10 @@
     UILabel *ramInfoLabel;
 }
 - (id)init;
-- (void)orientationChanged;
+- (void)updateOrientation;
 - (void)updateFrame;
-- (void)updateColor: (UIColor*)color;
+- (void)updateRAMInfoSize;
+- (void)updateTextColor: (UIColor*)color;
 @end
 
 @interface UIWindow ()
