@@ -238,7 +238,7 @@ static void loadDeviceScreenDimensions()
 	{
 		if(ramInfoWindow && ramInfoLabel)
 		{
-			if(![[%c(SBCoverSheetPresentationManager) sharedInstance] isPresented] && ![[%c(SBControlCenterController) sharedInstance] isVisible])
+			if(![[%c(SBCoverSheetPresentationManager) sharedInstance] isPresented])
 			{
 				[ramInfoWindow setHidden: NO];
 				[ramInfoLabel setText: getMemoryStats()];
