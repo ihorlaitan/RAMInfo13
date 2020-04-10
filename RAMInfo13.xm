@@ -109,6 +109,7 @@ static void loadDeviceScreenDimensions()
 				[ramInfoWindow setAlpha: 1];
 				[ramInfoWindow _setSecure: YES];
 				[ramInfoWindow setUserInteractionEnabled: NO];
+				[[ramInfoWindow layer] setAnchorPoint: CGPointZero];
 				
 				ramInfoLabel = [[UILabel alloc] initWithFrame: CGRectMake(0, 0, width, height)];
 				[ramInfoLabel setNumberOfLines: 1];
@@ -189,21 +190,21 @@ static void loadDeviceScreenDimensions()
 				case UIDeviceOrientationLandscapeRight:
 				{
 					newLocationX = landscapeY;
-					newLocationY = screenHeight - width - landscapeX;
+					newLocationY = screenHeight - landscapeX;
 					newTransform = CGAffineTransformMakeRotation(-DegreesToRadians(90));
 					break;
 				}
 				case UIDeviceOrientationLandscapeLeft:
 				{
-					newLocationX = screenWidth - height - landscapeY;
 					newLocationY = landscapeX;
+					newLocationX = screenWidth - landscapeY;
 					newTransform = CGAffineTransformMakeRotation(DegreesToRadians(90));
 					break;
 				}
 				case UIDeviceOrientationPortraitUpsideDown:
 				{
-					newLocationX = screenWidth - portraitX - width;
-					newLocationY = screenHeight - height - portraitY;
+					newLocationX = screenWidth - portraitX;
+					newLocationY = screenHeight - portraitY;
 					newTransform = CGAffineTransformMakeRotation(DegreesToRadians(180));
 					break;
 				}

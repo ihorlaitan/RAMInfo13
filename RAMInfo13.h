@@ -12,6 +12,7 @@
 - (void)updateOrientation;
 - (void)updateFrame;
 - (void)updateRAMInfoSize;
+- (void)updateText;
 - (void)updateTextColor: (UIColor*)color;
 @end
 
