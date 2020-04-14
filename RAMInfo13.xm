@@ -343,7 +343,10 @@ static void settingsChanged(CFNotificationCenterRef center, void *observer, CFSt
 	}
 
 	if(ramInfoObject) 
+	{
 		[ramInfoObject updateFrame];
+		[ramInfoObject updateText];
+	}	
 }
 
 %ctor
