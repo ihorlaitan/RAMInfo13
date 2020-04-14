@@ -25,6 +25,10 @@ static NSString *freeRAMPrefix;
 static BOOL showTotalPhysicalRam;
 static NSString *totalRAMPrefix;
 static NSString *separator;
+static BOOL backgroundColorEnabled;
+static float backgroundCornerRadius;
+static BOOL customBackgroundColorEnabled;
+static UIColor *customBackgroundColor;
 static double portraitX;
 static double portraitY;
 static double landscapeX;
@@ -34,8 +38,8 @@ static double width;
 static double height;
 static long fontSize;
 static BOOL boldFont;
-static BOOL customColorEnabled;
-static UIColor *customColor;
+static BOOL customTextColorEnabled;
+static UIColor *customTextColor;
 static long alignment;
 static double updateInterval;
 
@@ -94,6 +98,16 @@ static void loadDeviceScreenDimensions()
 	}
 }
 
+@implementation UILabelWithInsets
+
+- (void)drawTextInRect: (CGRect)rect
+{
+    UIEdgeInsets insets = {0, 5, 0, 5};
+    [super drawTextInRect: UIEdgeInsetsInsetRect(rect, insets)];
+}
+
+@end
+
 @implementation RamInfo
 
 	- (id)init
@@ -111,8 +125,9 @@ static void loadDeviceScreenDimensions()
 				[ramInfoWindow setUserInteractionEnabled: NO];
 				[[ramInfoWindow layer] setAnchorPoint: CGPointZero];
 				
-				ramInfoLabel = [[UILabel alloc] initWithFrame: CGRectMake(0, 0, width, height)];
+				ramInfoLabel = [[UILabelWithInsets alloc] initWithFrame: CGRectMake(0, 0, width, height)];
 				[ramInfoLabel setNumberOfLines: 1];
+				[[ramInfoLabel layer] setMasksToBounds: YES];
 				[(UIView *)ramInfoWindow addSubview: ramInfoLabel];
 
 				[self updateFrame];
@@ -149,8 +164,19 @@ static void loadDeviceScreenDimensions()
 
 		[ramInfoLabel setTextAlignment: alignment];
 
-		if(customColorEnabled)
-			[ramInfoObject updateTextColor: customColor];
+		if(customTextColorEnabled)
+			[ramInfoLabel setTextColor: customTextColor];
+
+		if(!backgroundColorEnabled)
+			[ramInfoLabel setBackgroundColor: [UIColor clearColor]];
+		else
+		{
+			[[ramInfoLabel layer] setCornerRadius: backgroundCornerRadius];
+			[[ramInfoLabel layer] setContinuousCorners: YES];
+			
+			if(customBackgroundColorEnabled)
+				[ramInfoLabel setBackgroundColor: customBackgroundColor];
+		}
 	}
 
 	- (void)updateRAMInfoSize
@@ -196,8 +222,8 @@ static void loadDeviceScreenDimensions()
 				}
 				case UIDeviceOrientationLandscapeLeft:
 				{
-					newLocationY = landscapeX;
 					newLocationX = screenWidth - landscapeY;
+					newLocationY = landscapeX;
 					newTransform = CGAffineTransformMakeRotation(DegreesToRadians(90));
 					break;
 				}
@@ -232,7 +258,18 @@ static void loadDeviceScreenDimensions()
 
 	- (void)updateTextColor: (UIColor*)color
 	{
-		[ramInfoLabel setTextColor: color];
+		CGFloat r;
+    	[color getRed: &r green: nil blue: nil alpha: nil];
+		if(r == 0 || r == 1)
+		{
+			if(!customTextColorEnabled) [ramInfoLabel setTextColor: color];
+			if(backgroundColorEnabled && !customBackgroundColorEnabled) 
+			{
+				if(r == 0) [ramInfoLabel setBackgroundColor: [[UIColor whiteColor] colorWithAlphaComponent: 0.5]];
+				else [ramInfoLabel setBackgroundColor: [[UIColor blackColor] colorWithAlphaComponent: 0.5]];
+			}	
+
+		}
 	}
 
 	- (void)updateText
@@ -269,7 +306,7 @@ static void loadDeviceScreenDimensions()
 {
 	%orig;
 	
-	if(!customColorEnabled && ramInfoObject && [self styleAttributes] && [[self styleAttributes] imageTintColor]) 
+	if(ramInfoObject && [self styleAttributes] && [[self styleAttributes] imageTintColor]) 
 		[ramInfoObject updateTextColor: [[self styleAttributes] imageTintColor]];
 }
 
@@ -286,6 +323,9 @@ static void settingsChanged(CFNotificationCenterRef center, void *observer, CFSt
 	showTotalPhysicalRam = [pref boolForKey: @"showTotalPhysicalRam"];
 	totalRAMPrefix = [pref objectForKey: @"totalRAMPrefix"];
 	separator = [pref objectForKey: @"separator"];
+	backgroundColorEnabled = [pref boolForKey: @"backgroundColorEnabled"];
+	backgroundCornerRadius = [pref floatForKey: @"backgroundCornerRadius"];
+	customBackgroundColorEnabled = [pref boolForKey: @"customBackgroundColorEnabled"];
 	portraitX = [pref floatForKey: @"portraitX"];
 	portraitY = [pref floatForKey: @"portraitY"];
 	landscapeX = [pref floatForKey: @"landscapeX"];
@@ -295,14 +335,15 @@ static void settingsChanged(CFNotificationCenterRef center, void *observer, CFSt
 	height = [pref floatForKey: @"height"];
 	fontSize = [pref integerForKey: @"fontSize"];
 	boldFont = [pref boolForKey: @"boldFont"];
-	customColorEnabled = [pref boolForKey: @"customColorEnabled"];
+	customTextColorEnabled = [pref boolForKey: @"customTextColorEnabled"];
 	alignment = [pref integerForKey: @"alignment"];
 	updateInterval = [pref doubleForKey: @"updateInterval"];
 
-	if(customColorEnabled)
+	if(backgroundColorEnabled && customBackgroundColorEnabled || customTextColorEnabled)
 	{
 		NSDictionary *preferencesDictionary = [NSDictionary dictionaryWithContentsOfFile: @"/var/mobile/Library/Preferences/com.johnzaro.raminfo13prefs.colors.plist"];
-		customColor = [SparkColourPickerUtils colourWithString: [preferencesDictionary objectForKey: @"customColor"] withFallback: @"#FF9400"];
+		customBackgroundColor = [SparkColourPickerUtils colourWithString: [preferencesDictionary objectForKey: @"customBackgroundColor"] withFallback: @"#000000:0.50"];
+		customTextColor = [SparkColourPickerUtils colourWithString: [preferencesDictionary objectForKey: @"customTextColor"] withFallback: @"#FF9400"];
 	}
 
 	if(ramInfoObject) 
@@ -324,6 +365,9 @@ static void settingsChanged(CFNotificationCenterRef center, void *observer, CFSt
 			@"showTotalPhysicalRam": @NO,
 			@"totalRAMPrefix": @"T: ",
 			@"separator": @", ",
+			@"backgroundColorEnabled": @NO,
+			@"backgroundCornerRadius": @6,
+			@"customBackgroundColorEnabled": @NO,
 			@"portraitX": @298,
 			@"portraitY": @2,
 			@"landscapeX": @750,
@@ -333,7 +377,7 @@ static void settingsChanged(CFNotificationCenterRef center, void *observer, CFSt
 			@"height": @12,
 			@"fontSize": @8,
 			@"boldFont": @NO,
-			@"customColorEnabled": @NO,
+			@"customTextColorEnabled": @NO,
 			@"alignment": @0,
 			@"updateInterval": @2.0
     	}];

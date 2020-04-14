@@ -3,10 +3,13 @@
 - (BOOL)isPresented;
 @end
 
+@interface UILabelWithInsets : UILabel
+@end
+
 @interface RamInfo: NSObject
 {
     UIWindow *ramInfoWindow;
-    UILabel *ramInfoLabel;
+    UILabelWithInsets *ramInfoLabel;
 }
 - (id)init;
 - (void)updateOrientation;
@@ -30,4 +33,8 @@
 
 @interface _UIStatusBar: UIView
 @property(nonatomic, retain) _UIStatusBarStyleAttributes *styleAttributes;
+@end
+
+@interface CALayer ()
+- (void)setContinuousCorners:(BOOL)arg1;
 @end
