@@ -208,37 +208,36 @@ static void loadDeviceScreenDimensions()
 				return;
 			
 			CGAffineTransform newTransform;
-			int newLocationX;
-			int newLocationY;
+			CGRect frame = [ramInfoWindow frame];
 
 			switch (orientation)
 			{
 				case UIDeviceOrientationLandscapeRight:
 				{
-					newLocationX = landscapeY;
-					newLocationY = screenHeight - landscapeX;
+					frame.origin.x = landscapeY;
+					frame.origin.y = screenHeight - landscapeX;
 					newTransform = CGAffineTransformMakeRotation(-DegreesToRadians(90));
 					break;
 				}
 				case UIDeviceOrientationLandscapeLeft:
 				{
-					newLocationX = screenWidth - landscapeY;
-					newLocationY = landscapeX;
+					frame.origin.x = screenWidth - landscapeY;
+					frame.origin.y = landscapeX;
 					newTransform = CGAffineTransformMakeRotation(DegreesToRadians(90));
 					break;
 				}
 				case UIDeviceOrientationPortraitUpsideDown:
 				{
-					newLocationX = screenWidth - portraitX;
-					newLocationY = screenHeight - portraitY;
+					frame.origin.x = screenWidth - portraitX;
+					frame.origin.y = screenHeight - portraitY;
 					newTransform = CGAffineTransformMakeRotation(DegreesToRadians(180));
 					break;
 				}
 				case UIDeviceOrientationPortrait:
 				default:
 				{
-					newLocationX = portraitX;
-					newLocationY = portraitY;
+					frame.origin.x = portraitX;
+					frame.origin.y = portraitY;
 					newTransform = CGAffineTransformMakeRotation(DegreesToRadians(0));
 					break;
 				}
@@ -247,9 +246,6 @@ static void loadDeviceScreenDimensions()
 			[UIView animateWithDuration: 0.3f animations:
 			^{
 				[ramInfoWindow setTransform: newTransform];
-				CGRect frame = [ramInfoWindow frame];
-				frame.origin.x = newLocationX;
-				frame.origin.y = newLocationY;
 				[ramInfoWindow setFrame: frame];
 				orientationOld = orientation;
 			} completion: nil];
