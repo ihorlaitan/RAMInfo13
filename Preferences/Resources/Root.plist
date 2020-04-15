@@ -37,6 +37,8 @@
 			<string>PSGroupCell</string>
 			<key>label</key>
 			<string>DISPLAY OPTIONS</string>
+			<key>footerText</key>
+			<string>'Show On Lock Screen' Will Show RAM Info While Device Is Unlocked.</string>
 		</dict>
 		<dict>
 			<key>cell</key>
@@ -119,6 +121,20 @@
 			<string>totalRAMPrefix</string>
 			<key>label</key>
 			<string>Total RAM Prefix</string>
+			<key>PostNotification</key>
+			<string>com.johnzaro.raminfo13prefs/reloadprefs</string>
+		</dict>
+		<dict>
+			<key>cell</key>
+			<string>PSSwitchCell</string>
+			<key>default</key>
+			<false/>
+			<key>defaults</key>
+			<string>com.johnzaro.raminfo13prefs</string>
+			<key>key</key>
+			<string>showOnLockScreen</string>
+			<key>label</key>
+			<string>Show On Lock Screen</string>
 			<key>PostNotification</key>
 			<string>com.johnzaro.raminfo13prefs/reloadprefs</string>
 		</dict>
@@ -353,7 +369,7 @@
 			<key>cell</key>
 			<string>PSGroupCell</string>
 			<key>label</key>
-			<string>FONT SIZE</string>
+			<string>TEXT FONT</string>
 		</dict>
 		<dict>
 			<key>cell</key>
@@ -432,7 +448,7 @@
 			<key>cell</key>
 			<string>PSGroupCell</string>
 			<key>label</key>
-			<string>ALIGNMENT</string>
+			<string>TEXT ALIGNMENT</string>
 		</dict>
 		<dict>
 			<key>cell</key>

@@ -18,6 +18,7 @@ __strong static id ramInfoObject;
 
 static HBPreferences *pref;
 static BOOL enabled;
+static BOOL showOnLockScreen;
 static BOOL showUsedRam;
 static NSString *usedRAMPrefix;
 static BOOL showFreeRam;
@@ -118,7 +119,6 @@ static void loadDeviceScreenDimensions()
 			@try
 			{
 				ramInfoWindow = [[UIWindow alloc] initWithFrame: CGRectMake(0, 0, width, height)];
-				[ramInfoWindow setWindowLevel: 1000];
 				[ramInfoWindow setHidden: NO];
 				[ramInfoWindow setAlpha: 1];
 				[ramInfoWindow _setSecure: YES];
@@ -150,6 +150,9 @@ static void loadDeviceScreenDimensions()
 
 	- (void)_updateFrame
 	{
+		if(showOnLockScreen) [ramInfoWindow setWindowLevel: 1050];
+		else [ramInfoWindow setWindowLevel: 1000];
+
 		[self updateRAMInfoLabelProperties];
 		[self updateRAMInfoSize];
 
@@ -272,7 +275,7 @@ static void loadDeviceScreenDimensions()
 	{
 		if(ramInfoWindow && ramInfoLabel)
 		{
-			if(![[%c(SBCoverSheetPresentationManager) sharedInstance] isPresented])
+			if(![[%c(SBCoverSheetPresentationManager) sharedInstance] _isEffectivelyLocked])
 			{
 				[ramInfoWindow setHidden: NO];
 				[ramInfoLabel setText: getMemoryStats()];
@@ -312,6 +315,7 @@ static void settingsChanged(CFNotificationCenterRef center, void *observer, CFSt
 {
 	if(!pref) pref = [[HBPreferences alloc] initWithIdentifier: @"com.johnzaro.raminfo13prefs"];
 	enabled = [pref boolForKey: @"enabled"];
+	showOnLockScreen = [pref boolForKey: @"showOnLockScreen"];
 	showUsedRam = [pref boolForKey: @"showUsedRam"];
 	usedRAMPrefix = [pref objectForKey: @"usedRAMPrefix"];
 	showFreeRam = [pref boolForKey: @"showFreeRam"];
@@ -357,6 +361,7 @@ static void settingsChanged(CFNotificationCenterRef center, void *observer, CFSt
 		[pref registerDefaults:
 		@{
 			@"enabled": @NO,
+			@"showOnLockScreen": @NO,
 			@"showUsedRam": @NO,
 			@"usedRAMPrefix": @"U: ",
 			@"showFreeRam": @NO,
