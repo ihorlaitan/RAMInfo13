@@ -1,4 +1,5 @@
 #import "RINRootListController.h"
+#import "SparkAppListTableViewController.h"
 #import "SparkColourPickerView.h"
 #import "spawn.h"
 
@@ -74,6 +75,24 @@
 	return _specifiers;
 }
 
+- (void)selectDoubleTapApp
+{
+    SparkAppListTableViewController *s = [[SparkAppListTableViewController alloc] initWithIdentifier: @"com.johnzaro.raminfo13prefs.gestureApps" andKey: @"doubleTapApp"];
+    [s setMaxEnabled: 1];
+
+    [self.navigationController pushViewController: s animated: YES];
+    self.navigationItem.hidesBackButton = FALSE;
+}
+
+- (void)selectHoldApp
+{
+    SparkAppListTableViewController *s = [[SparkAppListTableViewController alloc] initWithIdentifier: @"com.johnzaro.raminfo13prefs.gestureApps" andKey: @"holdApp"];
+    [s setMaxEnabled: 1];
+    
+    [self.navigationController pushViewController: s animated: YES];
+    self.navigationItem.hidesBackButton = FALSE;
+}
+
 - (void)reset: (PSSpecifier*)specifier
 {
     UIAlertController *reset = [UIAlertController
@@ -86,8 +105,9 @@
             [[[HBPreferences alloc] initWithIdentifier: @"com.johnzaro.raminfo13prefs"] removeAllObjects];
 
             NSFileManager *manager = [NSFileManager defaultManager];
-            [manager removeItemAtPath:@"/var/mobile/Library/Preferences/com.johnzaro.raminfo13prefs.plist" error: nil];
-            [manager removeItemAtPath:@"/var/mobile/Library/Preferences/com.johnzaro.raminfo13prefs.colors.plist" error: nil];
+            [manager removeItemAtPath: @"/var/mobile/Library/Preferences/com.johnzaro.raminfo13prefs.plist" error: nil];
+            [manager removeItemAtPath: @"/var/mobile/Library/Preferences/com.johnzaro.raminfo13prefs.colors.plist" error: nil];
+            [manager removeItemAtPath: @"/var/mobile/Library/Preferences/com.johnzaro.raminfo13prefs.gestureApps.plist" error: nil];
 
             [self respring];
         }];

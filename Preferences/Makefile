@@ -8,9 +8,9 @@ RAMInfo13Prefs_FILES = RINAppearanceSettings.m RINRootHeaderView.mm RINRootListC
 RAMInfo13Prefs_INSTALL_PATH = /Library/PreferenceBundles
 RAMInfo13Prefs_FRAMEWORKS = UIKit
 RAMInfo13Prefs_PRIVATE_FRAMEWORKS = Preferences
-RAMInfo13Prefs_LIBRARIES = sparkcolourpicker
-RAMInfo13Prefs_CFLAGS = -fobjc-arc -Wno-deprecated-declarations
-RAMInfo13Prefs_EXTRA_FRAMEWORKS = Cephei CepheiPrefs
+RAMInfo13Prefs_LIBRARIES += sparkcolourpicker sparkapplist
+RAMInfo13Prefs_CFLAGS += -fobjc-arc -Wno-deprecated-declarations
+RAMInfo13Prefs_EXTRA_FRAMEWORKS += Cephei CepheiPrefs
 
 include $(THEOS_MAKE_PATH)/bundle.mk
 

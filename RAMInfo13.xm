@@ -1,6 +1,7 @@
 #import "RAMInfo13.h"
 
 #import "SparkColourPickerUtils.h"
+#import "SparkAppList.h"
 #import <Cephei/HBPreferences.h>
 #import <mach/mach_init.h>
 #import <mach/mach_host.h>
@@ -43,6 +44,10 @@ static BOOL customTextColorEnabled;
 static UIColor *customTextColor;
 static long alignment;
 static double updateInterval;
+static BOOL enableDoubleTap;
+static NSString *doubleTapIdentifier;
+static BOOL enableHold;
+static NSString *holdIdentifier;
 
 static NSString* getMemoryStats()
 {
@@ -122,13 +127,20 @@ static void loadDeviceScreenDimensions()
 				[ramInfoWindow setHidden: NO];
 				[ramInfoWindow setAlpha: 1];
 				[ramInfoWindow _setSecure: YES];
-				[ramInfoWindow setUserInteractionEnabled: NO];
+				[ramInfoWindow setUserInteractionEnabled: YES];
 				[[ramInfoWindow layer] setAnchorPoint: CGPointZero];
 				
 				ramInfoLabel = [[UILabelWithInsets alloc] initWithFrame: CGRectMake(0, 0, width, height)];
 				[ramInfoLabel setNumberOfLines: 1];
 				[[ramInfoLabel layer] setMasksToBounds: YES];
-				[(UIView *)ramInfoWindow addSubview: ramInfoLabel];
+				[ramInfoWindow addSubview: ramInfoLabel];
+
+				UITapGestureRecognizer *tapGestureRecognizer = [[UITapGestureRecognizer alloc] initWithTarget: self action: @selector(openDoubleTapApp)];
+				[tapGestureRecognizer setNumberOfTapsRequired: 2];
+				[ramInfoWindow addGestureRecognizer: tapGestureRecognizer];
+
+				UILongPressGestureRecognizer *holdGestureRecognizer = [[UILongPressGestureRecognizer alloc] initWithTarget: self action: @selector(openHoldApp)];
+				[ramInfoWindow addGestureRecognizer: holdGestureRecognizer];
 
 				[self updateFrame];
 
@@ -150,7 +162,7 @@ static void loadDeviceScreenDimensions()
 
 	- (void)_updateFrame
 	{
-		if(showOnLockScreen) [ramInfoWindow setWindowLevel: 1050];
+		if(showOnLockScreen) [ramInfoWindow setWindowLevel: 1051];
 		else [ramInfoWindow setWindowLevel: 1000];
 
 		[self updateRAMInfoLabelProperties];
@@ -284,6 +296,18 @@ static void loadDeviceScreenDimensions()
 		}
 	}
 
+	- (void)openDoubleTapApp
+	{
+		if(enableDoubleTap && doubleTapIdentifier)
+			[[UIApplication sharedApplication] launchApplicationWithIdentifier: doubleTapIdentifier suspended: NO];
+	}
+
+	- (void)openHoldApp
+	{
+		if(enableHold && holdIdentifier)
+			[[UIApplication sharedApplication] launchApplicationWithIdentifier: holdIdentifier suspended: NO];
+	}
+
 @end
 
 %hook SpringBoard
@@ -338,12 +362,28 @@ static void settingsChanged(CFNotificationCenterRef center, void *observer, CFSt
 	customTextColorEnabled = [pref boolForKey: @"customTextColorEnabled"];
 	alignment = [pref integerForKey: @"alignment"];
 	updateInterval = [pref doubleForKey: @"updateInterval"];
+	enableDoubleTap = [pref boolForKey: @"enableDoubleTap"];
+	enableHold = [pref boolForKey: @"enableHold"];
 
 	if(backgroundColorEnabled && customBackgroundColorEnabled || customTextColorEnabled)
 	{
 		NSDictionary *preferencesDictionary = [NSDictionary dictionaryWithContentsOfFile: @"/var/mobile/Library/Preferences/com.johnzaro.raminfo13prefs.colors.plist"];
 		customBackgroundColor = [SparkColourPickerUtils colourWithString: [preferencesDictionary objectForKey: @"customBackgroundColor"] withFallback: @"#000000:0.50"];
 		customTextColor = [SparkColourPickerUtils colourWithString: [preferencesDictionary objectForKey: @"customTextColor"] withFallback: @"#FF9400"];
+	}
+
+	if(enableDoubleTap)
+	{
+		NSArray *doubleTapApp = [SparkAppList getAppListForIdentifier: @"com.johnzaro.raminfo13prefs.gestureApps" andKey: @"doubleTapApp"];
+		if(doubleTapApp && [doubleTapApp count] == 1)
+			doubleTapIdentifier = doubleTapApp[0];
+	}
+
+	if(enableHold)
+	{
+		NSArray *holdApp = [SparkAppList getAppListForIdentifier: @"com.johnzaro.raminfo13prefs.gestureApps" andKey: @"holdApp"];
+		if(holdApp && [holdApp count] == 1)
+			holdIdentifier = holdApp[0];
 	}
 
 	if(ramInfoObject) 
@@ -383,7 +423,9 @@ static void settingsChanged(CFNotificationCenterRef center, void *observer, CFSt
 			@"boldFont": @NO,
 			@"customTextColorEnabled": @NO,
 			@"alignment": @0,
-			@"updateInterval": @2.0
+			@"updateInterval": @2.0,
+			@"enableDoubleTap": @NO,
+			@"enableHold": @NO
     	}];
 
 		settingsChanged(NULL, NULL, NULL, NULL, NULL);
@@ -393,7 +435,7 @@ static void settingsChanged(CFNotificationCenterRef center, void *observer, CFSt
 			PHYSICAL_MEMORY = [NSProcessInfo processInfo].physicalMemory / MEGABYTES;
 
 			CFNotificationCenterAddObserver(CFNotificationCenterGetDarwinNotifyCenter(), NULL, settingsChanged, CFSTR("com.johnzaro.raminfo13prefs/reloadprefs"), NULL, CFNotificationSuspensionBehaviorCoalesce);
-
+			
 			%init;
 		}
 	}
