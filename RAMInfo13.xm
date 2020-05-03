@@ -51,6 +51,8 @@ static NSString *holdIdentifier;
 static BOOL enableBlackListedApps;
 static NSArray *blackListedApps;
 
+static BOOL isBlacklistedAppInFront = NO;
+
 static NSString* getMemoryStats()
 {
 	mach_port_t host_port;
@@ -143,6 +145,8 @@ static void loadDeviceScreenDimensions()
 
 				UILongPressGestureRecognizer *holdGestureRecognizer = [[UILongPressGestureRecognizer alloc] initWithTarget: self action: @selector(openHoldApp)];
 				[ramInfoWindow addGestureRecognizer: holdGestureRecognizer];
+
+				coverSheetPresentationManagerInstance = [%c(SBCoverSheetPresentationManager) sharedInstance];
 
 				[self updateFrame];
 
@@ -289,18 +293,18 @@ static void loadDeviceScreenDimensions()
 	{
 		if(ramInfoWindow && ramInfoLabel)
 		{
-			if(![[%c(SBCoverSheetPresentationManager) sharedInstance] _isEffectivelyLocked])
+			if(![coverSheetPresentationManagerInstance _isEffectivelyLocked] && ([coverSheetPresentationManagerInstance isPresented] || !isBlacklistedAppInFront))
 			{
-				if(blackListedApps && [blackListedApps containsObject: [(SBApplication*)[(SpringBoard*)[UIApplication sharedApplication] _accessibilityFrontMostApplication] bundleIdentifier]])
-					[ramInfoWindow setHidden: YES];
-				else
-				{
-					[ramInfoWindow setHidden: NO];
-					[ramInfoLabel setText: getMemoryStats()];
-				}
+				[ramInfoWindow setHidden: NO];
+				[ramInfoLabel setText: getMemoryStats()];
 			}
 			else [ramInfoWindow setHidden: YES];
 		}
+	}
+
+	- (void)setHidden: (BOOL)arg
+	{
+		[ramInfoWindow setHidden: arg];
 	}
 
 	- (void)openDoubleTapApp
@@ -326,6 +330,16 @@ static void loadDeviceScreenDimensions()
 	loadDeviceScreenDimensions();
 	if(!ramInfoObject) 
 		ramInfoObject = [[RamInfo alloc] init];
+}
+
+-(void)frontDisplayDidChange: (id)arg1 
+{
+	%orig;
+
+	NSString *currentApp = [(SBApplication*)[self _accessibilityFrontMostApplication] bundleIdentifier];
+	isBlacklistedAppInFront = blackListedApps && currentApp && [blackListedApps containsObject: currentApp];
+
+	[ramInfoObject setHidden: isBlacklistedAppInFront];
 }
 
 %end

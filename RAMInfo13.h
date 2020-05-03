@@ -1,6 +1,7 @@
 @interface SBCoverSheetPresentationManager: NSObject
 + (id)sharedInstance;
 - (BOOL)_isEffectivelyLocked;
+- (BOOL)isPresented;
 @end
 
 @interface UILabelWithInsets : UILabel
@@ -10,6 +11,7 @@
 {
     UIWindow *ramInfoWindow;
     UILabelWithInsets *ramInfoLabel;
+    SBCoverSheetPresentationManager *coverSheetPresentationManagerInstance;
 }
 - (id)init;
 - (void)updateOrientation;
@@ -19,6 +21,7 @@
 - (void)updateTextColor: (UIColor*)color;
 - (void)openDoubleTapApp;
 - (void)openHoldApp;
+- (void)setHidden: (BOOL)arg;
 @end
 
 @interface UIWindow ()
@@ -31,6 +34,7 @@
 
 @interface SpringBoard: UIApplication
 - (id)_accessibilityFrontMostApplication;
+-(void)frontDisplayDidChange: (id)arg1;
 @end
 
 @interface UIApplication ()
