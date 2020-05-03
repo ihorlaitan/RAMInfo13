@@ -48,6 +48,8 @@ static BOOL enableDoubleTap;
 static NSString *doubleTapIdentifier;
 static BOOL enableHold;
 static NSString *holdIdentifier;
+static BOOL enableBlackListedApps;
+static NSArray *blackListedApps;
 
 static NSString* getMemoryStats()
 {
@@ -289,8 +291,13 @@ static void loadDeviceScreenDimensions()
 		{
 			if(![[%c(SBCoverSheetPresentationManager) sharedInstance] _isEffectivelyLocked])
 			{
-				[ramInfoWindow setHidden: NO];
-				[ramInfoLabel setText: getMemoryStats()];
+				if(blackListedApps && [blackListedApps containsObject: [(SBApplication*)[(SpringBoard*)[UIApplication sharedApplication] _accessibilityFrontMostApplication] bundleIdentifier]])
+					[ramInfoWindow setHidden: YES];
+				else
+				{
+					[ramInfoWindow setHidden: NO];
+					[ramInfoLabel setText: getMemoryStats()];
+				}
 			}
 			else [ramInfoWindow setHidden: YES];
 		}
@@ -364,6 +371,7 @@ static void settingsChanged(CFNotificationCenterRef center, void *observer, CFSt
 	updateInterval = [pref doubleForKey: @"updateInterval"];
 	enableDoubleTap = [pref boolForKey: @"enableDoubleTap"];
 	enableHold = [pref boolForKey: @"enableHold"];
+	enableBlackListedApps = [pref boolForKey: @"enableBlackListedApps"];
 
 	if(backgroundColorEnabled && customBackgroundColorEnabled || customTextColorEnabled)
 	{
@@ -385,6 +393,11 @@ static void settingsChanged(CFNotificationCenterRef center, void *observer, CFSt
 		if(holdApp && [holdApp count] == 1)
 			holdIdentifier = holdApp[0];
 	}
+
+	if(enableBlackListedApps)
+		blackListedApps = [SparkAppList getAppListForIdentifier: @"com.johnzaro.raminfo13prefs.blackListedApps" andKey: @"blackListedApps"];
+	else
+		blackListedApps = nil;
 
 	if(ramInfoObject) 
 	{
@@ -425,7 +438,8 @@ static void settingsChanged(CFNotificationCenterRef center, void *observer, CFSt
 			@"alignment": @0,
 			@"updateInterval": @2.0,
 			@"enableDoubleTap": @NO,
-			@"enableHold": @NO
+			@"enableHold": @NO,
+			@"enableBlackListedApps": @NO
     	}];
 
 		settingsChanged(NULL, NULL, NULL, NULL, NULL);

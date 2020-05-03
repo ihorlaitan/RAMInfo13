@@ -25,8 +25,17 @@
 - (void)_setSecure: (BOOL)arg1;
 @end
 
+@interface SBApplication: NSObject
+-(NSString*)bundleIdentifier;
+@end
+
+@interface SpringBoard: UIApplication
+- (id)_accessibilityFrontMostApplication;
+@end
+
 @interface UIApplication ()
 - (UIDeviceOrientation)_frontMostAppOrientation;
+- (BOOL)launchApplicationWithIdentifier:(id)arg1 suspended:(BOOL)arg2;
 @end
 
 @interface _UIStatusBarStyleAttributes: NSObject
@@ -39,8 +48,4 @@
 
 @interface CALayer ()
 - (void)setContinuousCorners:(BOOL)arg1;
-@end
-
-@interface UIApplication ()
-- (BOOL)launchApplicationWithIdentifier:(id)arg1 suspended:(BOOL)arg2;
 @end

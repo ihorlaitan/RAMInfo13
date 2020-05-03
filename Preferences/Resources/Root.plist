@@ -552,6 +552,36 @@
 			<key>action</key>
 			<string>selectHoldApp</string>
    	 	</dict>
+			<dict>
+			<key>cell</key>
+			<string>PSGroupCell</string>
+			<key>label</key>
+			<string>BLACKLISTED APPS</string>
+			<key>footerText</key>
+			<string>SWITCH OFF AND THEN ON AGAIN THE 'BLACK LIST APPS' SWITCH FOR THE NEW SELECTED APP TO BE SET CORRECTLY</string>
+		</dict>
+		<dict>
+			<key>cell</key>
+			<string>PSSwitchCell</string>
+			<key>default</key>
+			<false/>
+			<key>defaults</key>
+			<string>com.johnzaro.raminfo13prefs</string>
+			<key>key</key>
+			<string>enableBlackListedApps</string>
+			<key>label</key>
+			<string>Black List Apps</string>
+			<key>PostNotification</key>
+			<string>com.johnzaro.raminfo13prefs/reloadprefs</string>
+		</dict>
+		<dict>
+			<key>cell</key>
+			<string>PSButtonCell</string>
+			<key>label</key>
+			<string>Select Black Listed Apps</string>
+			<key>action</key>
+			<string>selectBlackListedApps</string>
+   	 	</dict>
 		<dict>
         	<key>cell</key>
 			<string>PSGroupCell</string>
